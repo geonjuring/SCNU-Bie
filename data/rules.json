@@ -1,0 +1,1299 @@
+{
+  "우주항공·첨단소재스쿨": {
+    "토목공학전공": {
+      "code": "CE",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 29,
+        "elective": 43,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "환경공학전공": {
+      "code": "EN",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 30,
+        "elective": 40,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "기계우주항공공학전공": {
+      "code": "MS",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 18,
+        "elective": 54,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "첨단신소재공학전공": {
+      "code": "MM",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 39,
+        "elective": 27,
+        "total": 66
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "화학공학전공": {
+      "code": "CG",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 39,
+        "elective": 33,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "전기공학전공": {
+      "code": "EL",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "전자공학전공": {
+      "code": "EI",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "인공지능공학전공": {
+      "code": "IC",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 12,
+        "elective": 60,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "컴퓨터공학전공": {
+      "code": "CS",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 34,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "화학전공": {
+      "code": "CH",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "에너지응용공학전공": {
+      "code": "EA",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 15,
+        "elective": 57,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    },
+    "글로벌에너지응용공학과": {
+      "code": "GY",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 15,
+        "elective": 57,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG0865 대학수학 (3)",
+        "XG0866 일반물리학 (3)",
+        "XG0875 화학 및 실험 I (3)"
+      ]
+    }
+  },
+  "그린스마트팜스쿨": {
+    "농생명과학전공": {
+      "code": "AL",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 3,
+        "elective": 75,
+        "total": 78
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "산림자원학전공": {
+      "code": "FR",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "조경학전공": {
+      "code": "LA",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 18,
+        "elective": 54,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "동물자원과학전공": {
+      "code": "AS",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 29,
+        "elective": 43,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "원예학전공": {
+      "code": "HO",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "식품공학전공": {
+      "code": "FT",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "농업경제학전공": {
+      "code": "AG",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "의생명과학전공": {
+      "code": "BI",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 20,
+        "elective": 50,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "조리과학전공": {
+      "code": "FC",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 17,
+        "elective": 53,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "바이오한약자원학전공": {
+      "code": "OR",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 36,
+        "elective": 36,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "국제농축산학과(농업·원예전공트랙)": {
+      "code": "IS",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    },
+    "국제농축산학과(동물자원전공트랙)": {
+      "code": "IS",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": [
+        "XG1118 스마트 농산업개론 (3)",
+        "XG1154 생명과학의 이해 (3)",
+        "XG0867 일반화학 (3)",
+        "XG1144 프레젠테이션 스토리와 발표 (3) 중 택3"
+      ]
+    }
+  },
+  "애니메이션·문화콘텐츠스쿨": {
+    "경제학전공": {
+      "code": "EC",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 7,
+        "elective": 59,
+        "total": 66
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "무역학전공": {
+      "code": "TR",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 70,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "경영학전공": {
+      "code": "BA",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 3,
+        "elective": 67,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "법학전공": {
+      "code": "LW",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 30,
+        "elective": 42,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "행정학전공": {
+      "code": "AD",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 25,
+        "elective": 36,
+        "total": 61
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "회계학전공": {
+      "code": "AC",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 23,
+        "elective": 47,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "물류학전공": {
+      "code": "LO",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 24,
+        "elective": 46,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "사회복지학전공": {
+      "code": "SW",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 69,
+        "total": 69
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1119 글로컬 비즈니스와 어카운팅 (3)",
+        "XG1120 글로컬 창의 경상 인재탐색 (3)",
+        "XG1113 융합공공인재의 탐색 (3) 중 택3"
+      ]
+    },
+    "글로벌중국학전공": {
+      "code": "CL",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 3,
+        "elective": 63,
+        "total": 66
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1105 철학으로 문화 읽기 (3)",
+        "XG1156 한국의 문화유산 (3) 중 택3"
+      ]
+    },
+    "일본어일본문화학전공": {
+      "code": "JL",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 70,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1105 철학으로 문화 읽기 (3)",
+        "XG1156 한국의 문화유산 (3) 중 택3"
+      ]
+    },
+    "사학전공": {
+      "code": "HI",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 10,
+        "elective": 60,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1105 철학으로 문화 읽기 (3)",
+        "XG1156 한국의 문화유산 (3) 중 택3"
+      ]
+    },
+    "철학전공": {
+      "code": "PH",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 6,
+        "elective": 64,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1105 철학으로 문화 읽기 (3)",
+        "XG1156 한국의 문화유산 (3) 중 택3"
+      ]
+    },
+    "문예창작학전공": {
+      "code": "LI",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 30,
+        "elective": 38,
+        "total": 68
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    },
+    "사회체육학전공": {
+      "code": "SL",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 70,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    },
+    "음악예술융합학전공": {
+      "code": "PI",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 28,
+        "elective": 44,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    },
+    "사진미디어학전공": {
+      "code": "PA",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 11,
+        "elective": 59,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    },
+    "영상디자인학전공": {
+      "code": "DE",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 70,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    },
+    "만화애니메이션학전공": {
+      "code": "CA",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 12,
+        "elective": 58,
+        "total": 70
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    },
+    "패션디자인학전공": {
+      "code": "CT",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 6,
+        "creative": 14,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 30,
+        "elective": 42,
+        "total": 72
+      },
+      "school_foundation": [
+        "XG1117 동아시아의문화콘텐츠 이해 (3)",
+        "XG1103 문화콘텐츠 입문 (3)",
+        "XG1104 예술과 문화콘텐츠 (3)",
+        "XG1116 음악과 신체문화 (3) 중 택3"
+      ]
+    }
+  },
+  "본부직속": {
+    "자유전공학부": {
+      "code": "LS",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 0,
+        "total": 0
+      },
+      "school_foundation": []
+    },
+    "식품영양학과": {
+      "code": "FN",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 32,
+        "elective": 38,
+        "total": 70
+      },
+      "school_foundation": []
+    },
+    "융합바이오시스템기계공학과": {
+      "code": "AM",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 18,
+        "elective": 54,
+        "total": 72
+      },
+      "school_foundation": []
+    },
+    "간호학과": {
+      "code": "NU",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 99,
+        "elective": 5,
+        "total": 104
+      },
+      "school_foundation": []
+    },
+    "국제한국어교육과": {
+      "code": "IK",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 63,
+        "total": 63
+      },
+      "school_foundation": []
+    },
+    "건축학부": {
+      "code": "AP",
+      "total_credits": 166,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 107,
+        "elective": 12,
+        "total": 119
+      },
+      "school_foundation": []
+    },
+    "글로벌인재학부(글로벌매니지먼트전공)": {
+      "code": "GL",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 69,
+        "total": 69
+      },
+      "school_foundation": []
+    },
+    "글로벌인재학부(글로벌ICT문화예술콘텐츠전공)": {
+      "code": "GI",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 6,
+        "elective": 57,
+        "total": 63
+      },
+      "school_foundation": []
+    },
+    "스마트안전관리학과": {
+      "code": "SF",
+      "total_credits": 130,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 72,
+        "total": 72
+      },
+      "school_foundation": []
+    }
+  },
+  "사범대학": {
+    "국어교육과": {
+      "code": "KE",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 32,
+        "elective": 42,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "영어교육과": {
+      "code": "EE",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 27,
+        "elective": 47,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "사회교육과": {
+      "code": "SE",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 27,
+        "elective": 47,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "농업교육과": {
+      "code": "AE",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 27,
+        "elective": 47,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "수학교육과": {
+      "code": "MA",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 8,
+        "elective": 66,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "컴퓨터교육과": {
+      "code": "CO",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 39,
+        "elective": 35,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "환경교육과": {
+      "code": "ES",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 38,
+        "elective": 36,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "물리교육과": {
+      "code": "PD",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 38,
+        "elective": 36,
+        "total": 74
+      },
+      "school_foundation": []
+    },
+    "화학교육과": {
+      "code": "CD",
+      "total_credits": 140,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 15,
+        "elective": 59,
+        "total": 74
+      },
+      "school_foundation": []
+    }
+  },
+  "약학대학": {
+    "약학과": {
+      "code": "DP",
+      "total_credits": 240,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 8,
+        "total": "30~46"
+      },
+      "major": {
+        "required": 170,
+        "elective": 40,
+        "total": 210
+      },
+      "school_foundation": []
+    }
+  },
+  "평생교육스쿨": {
+    "미래융합학부(물류비즈니스전공트랙)": {
+      "code": "LB",
+      "total_credits": 110,
+      "general": {
+        "basic": 10,
+        "core": 2,
+        "creative": 15,
+        "total": "27~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": []
+    },
+    "미래융합학부(융합산업학전공트랙)": {
+      "code": "CN",
+      "total_credits": 110,
+      "general": {
+        "basic": 10,
+        "core": 2,
+        "creative": 15,
+        "total": "27~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": []
+    },
+    "미래융합학부(동물생명산업전공트랙)": {
+      "code": "IA",
+      "total_credits": 110,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 15,
+        "total": "27~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": []
+    },
+    "미래융합학부(정원문화산업전공트랙)": {
+      "code": "GC",
+      "total_credits": 110,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 15,
+        "total": "27~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": []
+    },
+    "미래융합학부(스포츠레저전공트랙)": {
+      "code": "SP",
+      "total_credits": 110,
+      "general": {
+        "basic": 10,
+        "core": 12,
+        "creative": 15,
+        "total": "27~46"
+      },
+      "major": {
+        "required": 0,
+        "elective": 60,
+        "total": 60
+      },
+      "school_foundation": []
+    }
+  }
+}
