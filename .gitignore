@@ -1,0 +1,17 @@
+# 1. 보안 핵심 (API Key 유출 방지)
+.env
+
+# 2. 가상환경 폴더 (용량 매우 큼, 서버에서 새로 설치함)
+venv/
+.venv/
+
+# 3. 파이썬 캐시 파일
+__pycache__/
+*.pyc
+
+# 4. 에이전트 및 임시 파일
+.agents/
+
+# 5. OS 임시 파일
+.DS_Store
+Thumbs.db
