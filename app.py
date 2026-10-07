@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import streamlit as st
 from rag import CurriculumAdvisor, SCHOOL_DEPARTMENT_MAP
@@ -8,7 +9,7 @@ st.set_page_config(
     page_title="스누비(SCNU-bie)",
     page_icon="🎓",
     layout="wide",
-    initial_sidebar_state="collapsed",  # 사이드바 닫힌 상태로 시작
+    initial_sidebar_state="expanded", # 대화 저장/불러오기 기능을 위해 사이드바 기본 활성화
 )
 
 # ----------------- 2. 네이비 & 블루 아카데믹 CSS 주입 -----------------
@@ -20,17 +21,10 @@ st.markdown("""
         font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     }
 
-    /* 사이드바 완전히 숨김 처리 */
-    section[data-testid="stSidebar"] {
-        display: none !important;
-    }
-
-    /* 메인 뷰 전체 배경 스타일 */
     .stApp {
         background: linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%) !important;
     }
 
-    /* 상단 아카데믹 네이비 배너 */
     .academic-header {
         background: linear-gradient(135deg, #0F2942 0%, #1E3A8A 50%, #2563EB 100%);
         padding: 26px 32px;
@@ -54,17 +48,6 @@ st.markdown("""
         opacity: 0.95;
     }
 
-    /* 학과 선택 컨트롤러 박스 */
-    .selector-card {
-        background-color: #FFFFFF;
-        padding: 20px 24px;
-        border-radius: 12px;
-        border: 1px solid #CBD5E1;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-        margin-bottom: 20px;
-    }
-
-    /* 학점 요약 메트릭 카드 */
     div[data-testid="stMetric"] {
         background-color: #FFFFFF !important;
         padding: 18px 22px !important;
@@ -84,7 +67,6 @@ st.markdown("""
         font-weight: 800 !important;
     }
 
-    /* 탭(Tab) 네비게이션 */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: #E2E8F0 !important;
@@ -107,7 +89,6 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(30, 58, 138, 0.25);
     }
 
-    /* 아코디언(Expander) 스타일 */
     .streamlit-expanderHeader {
         background-color: #FFFFFF !important;
         border: 1px solid #CBD5E1 !important;
@@ -119,11 +100,6 @@ st.markdown("""
         padding: 14px 20px !important;
         margin-bottom: 8px !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02) !important;
-        transition: all 0.2s ease;
-    }
-    .streamlit-expanderHeader:hover {
-        background-color: #F8FAFC !important;
-        border-color: #94A3B8 !important;
     }
     div[data-testid="stExpanderDetails"] {
         border-left: 1px solid #CBD5E1;
@@ -135,10 +111,8 @@ st.markdown("""
         background-color: #FFFFFF !important;
         margin-top: -8px;
         margin-bottom: 14px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     }
 
-    /* 버튼 스타일 */
     div.stButton > button {
         border-radius: 10px !important;
         font-weight: 700 !important;
@@ -146,30 +120,16 @@ st.markdown("""
         border: none !important;
         background-color: #1E3A8A !important;
         color: #FFFFFF !important;
-        transition: all 0.2s ease;
     }
     div.stButton > button:hover {
         background-color: #2563EB !important;
         box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
     }
-
-    /* 캐시 적중 뱃지 */
-    .cache-badge {
-        display: inline-block;
-        background-color: #EFF6FF;
-        color: #1D4ED8;
-        font-size: 0.8rem;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 6px;
-        border: 1px solid #BFDBFE;
-        margin-top: 6px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------- 3. RAG 엔진 로드 & 캐싱 -----------------
-@st.cache_resource
+# ----------------- 3. RAG 엔진 및 캐시 최적화 -----------------
+@st.cache_resource(show_spinner="학사 엔진을 초기화하는 중입니다...")
 def load_advisor():
     return CurriculumAdvisor()
 
@@ -180,57 +140,86 @@ except Exception as e:
     st.stop()
 
 @st.cache_data(show_spinner=False)
+def fetch_cached_curriculum(school: str, dept: str):
+    return advisor.get_curriculum_info(school, dept)
+
+@st.cache_data(show_spinner=False)
 def fetch_cached_answer(question: str) -> str:
     return advisor.ask_consultant(question)
 
-def get_answer_with_cache_tracker(question: str):
-    """캐시 적중 여부를 함께 반환하는 함수"""
-    start_time = time.time()
-    answer = fetch_cached_answer(question)
-    elapsed = time.time() - start_time
-    is_cached = elapsed < 0.05
-    return answer, is_cached
+# ----------------- 4. 사이드바: 대화 관리 -----------------
+with st.sidebar:
+    st.markdown("### 💬 대화 관리")
+    st.caption("현재 세션의 대화를 관리합니다.")
 
-# ----------------- 4. 상단 헤더 배너 -----------------
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # 대화 개수 표시
+    if st.session_state.messages:
+        msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
+        st.metric("질문한 개수", f"{msg_count}개")
+        st.markdown("---")
+
+    if st.button("🗑️ 대화 초기화", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+    
+    st.caption("💡 앱을 새로고침하면 대화 기록이 초기화됩니다.")
+
+# ----------------- 5. 상단 헤더 배너 -----------------
 st.markdown("""
 <div class="academic-header">
     <h1>🎓 스누비(SCNU-bie)</h1>
-    <p>2026 SCNU 뉴비(Newbie)들을 위해!</p>
+    <p>2026 SCNU 뉴비(Newbie)들을 위한 학사 네비게이터</p>
 </div>
 """, unsafe_allow_html=True)
 
-# ----------------- 5. 메인 탭 분리 -----------------
+# ----------------- 6. 메인 탭 분리 -----------------
 tab1, tab2 = st.tabs(["📚 전공 교육과정 & 졸업 요건", "💬 스누비"])
 
 # ==================== [탭 1] 전공 교육과정 조회 ====================
 with tab1:
     st.markdown("### 🏛️ 학과 및 전공 선택")
     
-    # 💡 메인 화면 상단 2열 선택창 배치
     col_school, col_dept = st.columns(2)
+    
+    school_options = ["단과대를 선택해 주세요."] + list(SCHOOL_DEPARTMENT_MAP.keys())
     with col_school:
         selected_school = st.selectbox(
             "1. 소속 스쿨 / 단과대학 선택",
-            options=list(SCHOOL_DEPARTMENT_MAP.keys()),
+            options=school_options,
             key="main_selected_school"
         )
     
     with col_dept:
-        available_departments = SCHOOL_DEPARTMENT_MAP[selected_school]
-        selected_department = st.selectbox(
-            "2. 학과(전공) 선택",
-            options=available_departments,
-            key="main_selected_dept"
-        )
+        if selected_school == "단과대를 선택해 주세요.":
+            selected_department = st.selectbox(
+                "2. 학과(전공) 선택",
+                options=["먼저 단과대를 선택해 주세요."],
+                key="main_selected_dept_disabled",
+                disabled=True
+            )
+            selected_department = None
+        else:
+            available_departments = SCHOOL_DEPARTMENT_MAP[selected_school]
+            dept_options = ["학과를 선택해 주세요."] + available_departments
+            selected_department = st.selectbox(
+                "2. 학과(전공) 선택",
+                options=dept_options,
+                key="main_selected_dept"
+            )
+            if selected_department == "학과를 선택해 주세요.":
+                selected_department = None
 
+    st.caption("학과를 선택하면 졸업요건과 학년·학기별 교육과정이 바로 아래에 표시됩니다.")
     st.markdown("---")
 
-    if st.button("🔍 교육과정 및 이수 요건 조회하기", key="btn_load_curriculum", use_container_width=True):
-        data = advisor.get_curriculum_info(selected_school, selected_department)
+    if selected_department:
+        data = fetch_cached_curriculum(selected_school, selected_department)
 
         st.markdown(f"## 📋 {selected_department} 이수 체계 및 졸업 요건")
 
-        # 1. 졸업 요건 카드 메트릭
         col1, col2, col3 = st.columns(3)
         col1.metric("총 졸업 요구학점", f"{data['total_credits']}학점")
         col2.metric("전공 요구학점", f"{data['major_total']}학점", f"전필 {data['major_req']} / 전선 {data['major_elec']}")
@@ -239,7 +228,6 @@ with tab1:
         st.markdown(f"**스쿨 학문기초 교과목**:\n{data['foundation_list']}")
         st.markdown("---")
 
-        # 2. 전공필수 요약
         st.markdown("### 🔴 전공필수(전필) 핵심 교과목")
         with st.expander("📌 전공필수 전체 목록 보기 (클릭하여 접기/펼치기)", expanded=True):
             if data["required_summary"]:
@@ -250,7 +238,6 @@ with tab1:
 
         st.markdown("---")
 
-        # 3. 학년·학기별 전공 교과목
         st.markdown("### 📚 권장 학년·학기별 전공 교과목 이수 체계")
         if data["grade_data"]:
             for grade_label, g_info in data["grade_data"].items():
@@ -274,7 +261,6 @@ with tab1:
 
         st.markdown("---")
 
-        # 4. 별도 지정 교과목
         st.markdown("### 📌 별도 지정 교과목 (교직이수 / 전공인정 타학과 교과목 등)")
         if data["separated_data"]:
             for cat_title, c_list in data["separated_data"].items():
@@ -283,6 +269,8 @@ with tab1:
                         st.markdown(c)
         else:
             st.info("해당 전공은 별도 지정 과목이 없습니다.")
+    else:
+        st.info("👆 위에서 소속 스쿨과 학과(전공)를 선택해 주세요.")
 
 
 # ==================== [탭 2] AI 학사 지도 챗봇 ====================
@@ -293,38 +281,45 @@ with tab2:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # 독립 고정 높이 대화 스크롤 창
-    chat_container = st.container(height=520)
+    EXAMPLE_QUESTIONS = [
+        "졸업하려면 학점이 총 몇 학점 필요해?",
+        "복수전공은 어떻게 신청해?",
+        "자유전공학부는 언제 전공을 정해?",
+    ]
+
+    def set_pending_question(q):
+        st.session_state.pending_question = q
+
+    # 대화 출력 컨테이너
+    chat_container = st.container(height=450)
 
     with chat_container:
         if not st.session_state.messages:
-            st.info("👋 질문을 입력하시면 2026 편람 규정을 분석해 답변해 드립니다.")
+            st.info("👋 질문을 입력하시거나 아래 추천 질문을 눌러 학사 규정을 확인해보세요.")
         
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
-                if msg.get("is_cached"):
-                    st.markdown("<span class='cache-badge'>⚡ 캐시 적중 (즉시 반환됨)</span>", unsafe_allow_html=True)
 
-    # 최하단 고정 질문 입력창
-    if prompt := st.chat_input("질문을 입력하세요"):
-        st.session_state.messages.append({"role": "user", "content": prompt, "is_cached": False})
+    # 💡 추천 질문 버튼들을 입력창 바로 위에 상시 고정 유지
+    st.markdown("📌 **추천 질문 빠른 선택**")
+    ex_cols = st.columns(len(EXAMPLE_QUESTIONS))
+    for i, q in enumerate(EXAMPLE_QUESTIONS):
+        ex_cols[i].button(q, key=f"example_q_{i}", on_click=set_pending_question, args=(q,), use_container_width=True)
+
+    typed_prompt = st.chat_input("질문을 입력하세요")
+    prompt = st.session_state.pop("pending_question", None) or typed_prompt
+
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
         
         with chat_container:
             with st.chat_message("user"):
                 st.markdown(prompt)
             with st.chat_message("assistant"):
                 with st.spinner("2026 학사 규정을 분석하여 답변을 생성 중입니다..."):
-                    response, is_cached = get_answer_with_cache_tracker(prompt.strip())
+                    response = fetch_cached_answer(prompt.strip())
                     st.markdown(response)
-                    if is_cached:
-                        st.markdown("<span class='cache-badge'>⚡ 캐시 적중 (즉시 반환됨)</span>", unsafe_allow_html=True)
 
-        st.session_state.messages.append({"role": "assistant", "content": response, "is_cached": is_cached})
+        st.session_state.messages.append({"role": "assistant", "content": response})
         st.rerun()
-
-    # 하단 대화 삭제 버튼
-    if st.session_state.messages:
-        if st.button("🗑️ 대화 내용 지우기", use_container_width=False):
-            st.session_state.messages = []
-            st.rerun()
