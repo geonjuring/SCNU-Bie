@@ -2,17 +2,17 @@ import os
 import json
 import re
 from dotenv import load_dotenv
-from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
+import streamlit as st
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
+# .env 환경변수 로드
 load_dotenv()
 
 DATA_DIR = "data"
 CHROMA_DIR = "./chroma_db"
-EMBEDDING_MODEL_NAME = "jhgan/ko-sroberta-multitask"
+EMBEDDING_MODEL_NAME = "gemini-embedding-2"
 RULES_PATH = os.path.join(DATA_DIR, "rules.json")
 CURRICULUM_PATH = os.path.join(DATA_DIR, "curriculum.json")
 
@@ -53,6 +53,7 @@ SCHOOL_DEPARTMENT_MAP = {
     ]
 }
 
+@st.cache_resource
 def load_json_file(file_path: str):
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
@@ -101,6 +102,34 @@ def format_separated_course_item(course: dict) -> str:
 
 def normalize_dept_name(name: str) -> str:
     return re.sub(r'\(.*?\)', '', name).strip().replace(" ", "")
+
+def detect_department_from_query(query: str) -> str:
+    """질문 내용에서 등록된 학과 이름이 포함되어 있는지 감지합니다.
+    반환값: 학과명 또는 None. 필터링에 사용하려면 normalize_dept_name() 적용 필요."""
+    for school, depts in SCHOOL_DEPARTMENT_MAP.items():
+        for dept in depts:
+            clean_dept = normalize_dept_name(dept)
+            if clean_dept in query.replace(" ", "") or dept in query:
+                return dept
+    return None
+
+def get_vectorstore_base():
+    """캐시 없이 순수 벡터스토어 객체를 반환합니다."""
+    resolved_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if os.path.exists(CHROMA_DIR) and resolved_key:
+        try:
+            from langchain_community.vectorstores import Chroma
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model=EMBEDDING_MODEL_NAME,
+                google_api_key=resolved_key,
+            )
+            return Chroma(
+                persist_directory=CHROMA_DIR,
+                embedding_function=embeddings,
+            )
+        except Exception as e:
+            print(f"Vectorstore load error: {e}")
+    return None
 
 def get_department_curriculum(department: str):
     curriculum_list = load_json_file(CURRICULUM_PATH)
@@ -176,7 +205,7 @@ def get_department_curriculum(department: str):
     return required_summary, grade_data_dict, separated_results
 
 class CurriculumAdvisor:
-    def __init__(self, api_key: str = None, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str = None, model_name: str = "gemini-3.5-flash-lite"):
         self.rules = load_json_file(RULES_PATH)
         resolved_key = api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 
@@ -188,24 +217,7 @@ class CurriculumAdvisor:
             max_output_tokens=4096,
         ) if resolved_key else None
 
-        # 💡 embding_2.py로 구축한 Chroma DB 연동
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
-        if os.path.exists(CHROMA_DIR):
-            self.vectorstore = Chroma(
-                persist_directory=CHROMA_DIR,
-                embedding_function=self.embeddings,
-            )
-            self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 4})
-        else:
-            self.vectorstore = None
-            self.retriever = None
-
     def get_curriculum_info(self, school: str, department: str) -> dict:
-        """학과 규정 및 편성표 정보를 딕셔너리로 반환"""
         school_info = self.rules.get(school, {}) if isinstance(self.rules, dict) else {}
         dept_info = school_info.get(department, {})
         if not dept_info:
@@ -251,19 +263,35 @@ class CurriculumAdvisor:
             "grade_data": grade_data_dict,
             "separated_data": separated_data
         }
-    
-    # (get_curriculum_info 메서드는 기존 그대로 유지)
 
     def ask_consultant(self, user_question: str) -> str:
-        """사이드바 학과와 무관하게 질문 내용만을 기반으로 Chroma DB 검색 및 답변"""
         if not self.llm:
             return "⚠️ Gemini API Key가 설정되지 않았습니다."
 
-        # 💡 오로지 사용자의 질문 내용으로만 Chroma DB 검색
+        vectorstore = get_vectorstore_base()
         rules_context = ""
-        if self.retriever:
+        
+        if vectorstore:
             try:
-                retrieved_docs = self.retriever.invoke(user_question)
+                # 💡 질문에서 학과명 감지 후 메타데이터 $or 필터 동적 적용
+                detected_dept = detect_department_from_query(user_question)
+                search_kwargs = {"k": 2}
+                
+                if detected_dept:
+                    # 필터에 사용할 학과명을 정규화 (괄호 제거)
+                    normalized_dept = normalize_dept_name(detected_dept)
+                    search_kwargs["filter"] = {
+                        "$or": [
+                            {"target_department": normalized_dept},
+                            {"target_department": "공통"}
+                        ]
+                    }
+                    print(f"🔍 [메타데이터 필터 적용] 대상 학과: {detected_dept} -> {normalized_dept}")
+                else:
+                    print("🔍 [전체/공통 검색] 특정 학과가 감지되지 않아 공통 규정 위주로 검색합니다.")
+
+                retriever = vectorstore.as_retriever(search_kwargs=search_kwargs)
+                retrieved_docs = retriever.invoke(user_question)
                 rules_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
             except Exception as e:
                 rules_context = f"(규정 검색 중 오류: {e})"
