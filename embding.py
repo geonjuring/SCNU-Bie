@@ -1,24 +1,29 @@
 import os
 import re
+import time
 import pymupdf4llm
+from dotenv import load_dotenv
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 from langchain_text_splitters import (
     MarkdownHeaderTextSplitter,
     RecursiveCharacterTextSplitter,
 )
 
+# .env 환경변수 로드
+load_dotenv()
+
 DATA_DIR = "data"
 CHROMA_DIR = "./chroma_db"
-EMBEDDING_MODEL_NAME = "jhgan/ko-sroberta-multitask"
+EMBEDDING_MODEL_NAME = "gemini-embedding-2"
 
 
 def get_embedding_model():
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
+    resolved_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    return GoogleGenerativeAIEmbeddings(
+        model=EMBEDDING_MODEL_NAME,
+        google_api_key=resolved_key,
     )
 
 
@@ -34,7 +39,6 @@ def ingest_pdfs_to_markdown():
 
     all_chunks = []
 
-    # 1. 마크다운 대제목 / 중제목 / 조항 분할 기준
     headers_to_split_on = [
         ("#", "Header_1"),
         ("##", "Header_2"),
@@ -47,26 +51,23 @@ def ingest_pdfs_to_markdown():
         strip_headers=False,
     )
 
-    # 💡 규정 텍스트와 남은 표가 깨지지 않도록 최적화된 청크 사이즈 (1000~1200자)
+    # 💡 429 TPM 제한을 피하기 위해 청크 사이즈를 600으로 축소
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1200,
-        chunk_overlap=200,
+        chunk_size=600,
+        chunk_overlap=100,
         separators=["\n\n\n", "\n\n", "\n제", "\n|", "\n", " "],
     )
 
     for pdf_file in pdf_files:
         file_path = os.path.join(DATA_DIR, pdf_file)
-        print(f"📄 PDF ➡️ 마크다운 변환 및 색인 중: {pdf_file}")
+        print(f"📄 PDF ➡️ 마크다운 변환 중: {pdf_file}")
         
-        # pymupdf4llm으로 표 구조를 마크다운 테이블(|---|---|)로 깔끔하게 보존 변환
         md_text = pymupdf4llm.to_markdown(file_path)
-
         md_docs = md_header_splitter.split_text(md_text)
 
         for doc in md_docs:
             header_context = " > ".join([str(v) for v in doc.metadata.values()])
             
-            # 학과 태그 추출
             dept_tag = "공통"
             combined_header_str = " ".join([str(v) for v in doc.metadata.values()])
             dept_match = re.search(r'([가-힣a-zA-Z·]+(?:전공|학과|학부|트랙))', combined_header_str)
@@ -92,14 +93,28 @@ def ingest_pdfs_to_markdown():
     if not all_chunks:
         return
 
-    # 기존 DB 캐시 충돌 방지 및 인덱싱
     embeddings = get_embedding_model()
-    Chroma.from_documents(
-        documents=all_chunks,
-        embedding=embeddings,
+    
+    # 빈 벡터스토어 생성
+    vectorstore = Chroma(
         persist_directory=CHROMA_DIR,
+        embedding_function=embeddings,
     )
-    print(f"✅ 편람 규정 및 잔여 표 인덱싱 완료: 총 {len(all_chunks)}개 청크")
+
+    # 💡 무료 플랜 TPM(30K) 초과 방지: 3개씩 전송하고 5초간 대기
+    batch_size = 3
+    total_chunks = len(all_chunks)
+    print(f"🔄 총 {total_chunks}개 청크 임베딩 전송 시작 (무료 플랜 제한 회피를 위해 안전하게 전송합니다)...")
+
+    for i in range(0, total_chunks, batch_size):
+        batch = all_chunks[i:i + batch_size]
+        vectorstore.add_documents(batch)
+        print(f"🔄 진행 상황: {min(i + batch_size, total_chunks)} / {total_chunks} 완료")
+        
+        if i + batch_size < total_chunks:
+            time.sleep(5.0)
+
+    print(f"✅ 편람 규정 및 잔여 표 인덱싱 완료: 총 {total_chunks}개 청크")
 
 
 if __name__ == "__main__":
