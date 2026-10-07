@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import time
 from dotenv import load_dotenv
 import streamlit as st
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -268,7 +269,11 @@ class CurriculumAdvisor:
         if not self.llm:
             return "⚠️ Gemini API Key가 설정되지 않았습니다."
 
+        t0 = time.perf_counter()
         vectorstore = get_vectorstore_base()
+        t1 = time.perf_counter()
+        t2 = t1
+        n_docs = 0
         rules_context = ""
         
         if vectorstore:
@@ -292,6 +297,8 @@ class CurriculumAdvisor:
 
                 retriever = vectorstore.as_retriever(search_kwargs=search_kwargs)
                 retrieved_docs = retriever.invoke(user_question)
+                t2 = time.perf_counter()
+                n_docs = len(retrieved_docs)
                 rules_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
             except Exception as e:
                 rules_context = f"(규정 검색 중 오류: {e})"
@@ -308,4 +315,14 @@ class CurriculumAdvisor:
 위 검색된 편람 규정을 바탕으로 학생의 질문에 대해서만 구체적이고 정확하게 답변해 주세요.""")
         ])
         chain = prompt | self.llm | StrOutputParser()
-        return chain.invoke({})
+        answer = chain.invoke({})
+        t3 = time.perf_counter()
+        # 진단용: 어느 단계가 느린지 로그로 확인 (Streamlit Cloud > Manage app > Logs)
+        # flush=True: 로그에 바로 나타나도록 (없으면 출력이 늦게 보일 수 있음)
+        print(
+            f"[타이밍] 질문='{user_question[:20]}' | 벡터스토어 준비 {t1-t0:.2f}s | "
+            f"검색(질문 임베딩 포함) {t2-t1:.2f}s (문서 {n_docs}개, 근거 {len(rules_context)}자) | "
+            f"LLM 답변 {t3-t2:.2f}s (답변 {len(answer)}자) | 전체 {t3-t0:.2f}s",
+            flush=True,
+        )
+        return answer
