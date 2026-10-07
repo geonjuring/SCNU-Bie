@@ -1,11 +1,6 @@
 streamlit
 langchain
 langchain-community
-langchain-huggingface
 langchain-google-genai
 chromadb
-pymupdf4llm
 python-dotenv
-sentence-transformers
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
