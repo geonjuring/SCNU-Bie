@@ -280,7 +280,7 @@ class CurriculumAdvisor:
             try:
                 # 💡 질문에서 학과명 감지 후 메타데이터 $or 필터 동적 적용
                 detected_dept = detect_department_from_query(user_question)
-                search_kwargs = {"k": 2}
+                search_kwargs = {"k": 4}
                 
                 if detected_dept:
                     # 필터에 사용할 학과명을 정규화 (괄호 제거)
