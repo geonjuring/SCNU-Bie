@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import uuid
 import streamlit as st
 from rag import CurriculumAdvisor, SCHOOL_DEPARTMENT_MAP
 
@@ -125,6 +126,22 @@ st.markdown("""
         background-color: #2563EB !important;
         box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
     }
+
+    /* 사이드바 대화 목록 버튼: 흰 배경의 가벼운 스타일 */
+    section[data-testid="stSidebar"] div.stButton > button {
+        background-color: #FFFFFF !important;
+        color: #1E3A8A !important;
+        border: 1px solid #CBD5E1 !important;
+        font-weight: 600 !important;
+        padding: 8px 12px !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+    section[data-testid="stSidebar"] div.stButton > button:hover {
+        background-color: #EFF6FF !important;
+        border-color: #2563EB !important;
+        box-shadow: none;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -147,25 +164,149 @@ def fetch_cached_curriculum(school: str, dept: str):
 def fetch_cached_answer(question: str) -> str:
     return advisor.ask_consultant(question)
 
-# ----------------- 4. 사이드바: 대화 관리 -----------------
+# ----------------- 4. 사이드바: 대화 목록 -----------------
+# --- chat helpers (start) ---
+TITLE_MAX = 28
+
+
+def create_chat():
+    """빈 대화를 하나 만들고 현재 대화로 지정합니다."""
+    cid = uuid.uuid4().hex[:8]
+    st.session_state.chats[cid] = {"title": "", "messages": []}
+    st.session_state.current_chat = cid
+
+
+def prune_empty(keep_id):
+    """질문이 없는 빈 대화는 keep_id만 남기고 정리합니다."""
+    for cid in list(st.session_state.chats):
+        if cid != keep_id and not st.session_state.chats[cid]["messages"]:
+            del st.session_state.chats[cid]
+
+
+def init_chat_state():
+    if "chats" not in st.session_state:
+        st.session_state.chats = {}
+        st.session_state.current_chat = None
+    if st.session_state.current_chat not in st.session_state.chats:
+        create_chat()
+    # 기존 코드가 쓰는 st.session_state.messages는 현재 대화의 메시지 목록을 가리킨다
+    st.session_state.messages = st.session_state.chats[st.session_state.current_chat]["messages"]
+
+
+def on_new_chat():
+    if st.session_state.chats[st.session_state.current_chat]["messages"]:
+        create_chat()
+        prune_empty(st.session_state.current_chat)
+
+
+def on_select_chat(cid):
+    if cid in st.session_state.chats:
+        st.session_state.current_chat = cid
+        prune_empty(cid)
+
+
+def on_delete_chat():
+    st.session_state.chats.pop(st.session_state.current_chat, None)
+    if st.session_state.chats:
+        st.session_state.current_chat = list(st.session_state.chats)[-1]
+    else:
+        create_chat()
+
+
+def export_chats_json():
+    data = [
+        {"title": c["title"], "messages": c["messages"]}
+        for c in st.session_state.chats.values()
+        if c["messages"]
+    ]
+    return json.dumps(data, ensure_ascii=False, indent=2)
+
+
+def _clean_messages(msgs):
+    return [
+        {"role": m["role"], "content": m["content"]}
+        for m in msgs
+        if isinstance(m, dict) and m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str)
+    ]
+
+
+def import_chats(raw):
+    """JSON을 읽어 대화 목록에 추가하고, 추가된 대화 수를 반환합니다."""
+    data = json.loads(raw)
+    if not isinstance(data, list):
+        raise ValueError("지원하지 않는 파일 형식입니다.")
+    # 예전 형식(메시지 목록 하나)도 하나의 대화로 읽는다
+    if data and all(isinstance(m, dict) and "role" in m for m in data):
+        data = [{"title": "", "messages": data}]
+    added = 0
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        msgs = item.get("messages")
+        if not isinstance(msgs, list):
+            continue
+        clean = _clean_messages(msgs)
+        if not clean:
+            continue
+        first_user = next((m["content"] for m in clean if m["role"] == "user"), "새 대화")
+        title = str(item.get("title") or first_user).replace("\n", " ")[:TITLE_MAX]
+        st.session_state.chats[uuid.uuid4().hex[:8]] = {"title": title, "messages": clean}
+        added += 1
+    return added
+# --- chat helpers (end) ---
+
 with st.sidebar:
-    st.markdown("### 💬 대화 관리")
-    st.caption("현재 세션의 대화를 관리합니다.")
+    init_chat_state()
+    st.markdown("### 💬 대화 목록")
+    st.button("➕ 새 대화", key="new_chat_btn", on_click=on_new_chat, use_container_width=True)
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    saved_chats = [(cid, c) for cid, c in reversed(list(st.session_state.chats.items())) if c["messages"]]
+    if not saved_chats:
+        st.caption("아직 대화가 없습니다. 질문하면 여기에 쌓입니다.")
+    for cid, c in saved_chats:
+        marker = "▶ " if cid == st.session_state.current_chat else ""
+        n_q = sum(1 for m in c["messages"] if m["role"] == "user")
+        st.button(
+            f"{marker}{c['title']}",
+            key=f"chat_btn_{cid}",
+            on_click=on_select_chat,
+            args=(cid,),
+            use_container_width=True,
+            help=f"질문 {n_q}개",
+        )
 
-    # 대화 개수 표시
-    if st.session_state.messages:
-        msg_count = len([m for m in st.session_state.messages if m["role"] == "user"])
-        st.metric("질문한 개수", f"{msg_count}개")
-        st.markdown("---")
+    st.markdown("---")
+    st.button("🗑️ 현재 대화 삭제", key="delete_chat_btn", on_click=on_delete_chat, use_container_width=True)
 
-    if st.button("🗑️ 대화 초기화", use_container_width=True):
-        st.session_state.messages = []
-        st.rerun()
-    
-    st.caption("💡 앱을 새로고침하면 대화 기록이 초기화됩니다.")
+    with st.expander("💾 대화 저장 / 불러오기"):
+        st.download_button(
+            label="📥 대화 전체 저장 (JSON)",
+            data=export_chats_json(),
+            file_name="scnu_bie_chats.json",
+            mime="application/json",
+            use_container_width=True,
+            disabled=not saved_chats,
+        )
+        uploaded_file = st.file_uploader("📂 저장한 대화 불러오기", type=["json"], key="chat_uploader")
+        if uploaded_file is None:
+            st.session_state["_loaded_sig"] = None
+        else:
+            sig = (uploaded_file.name, uploaded_file.size)
+            if st.session_state.get("_loaded_sig") != sig:
+                load_ok = False
+                try:
+                    n_added = import_chats(uploaded_file.getvalue().decode("utf-8"))
+                    st.session_state["_load_msg"] = f"{n_added}개의 대화를 불러왔습니다."
+                    load_ok = True
+                except Exception as e:
+                    st.session_state["_load_msg"] = f"파일을 읽는 중 오류가 발생했습니다: {e}"
+                st.session_state["_loaded_sig"] = sig
+                if load_ok:
+                    st.rerun()
+            if st.session_state.get("_load_msg"):
+                st.caption(st.session_state["_load_msg"])
+
+    st.caption("💡 저장하지 않으면 새로고침 시 대화가 사라집니다.")
 
 # ----------------- 5. 상단 헤더 배너 -----------------
 st.markdown("""
@@ -278,9 +419,6 @@ with tab2:
     st.subheader("💬 스누비")
     st.caption("졸업학점, 복수전공 규정 등을 2026 교육과정 기반으로 알려드려요!")
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
     EXAMPLE_QUESTIONS = [
         "졸업하려면 학점이 총 몇 학점 필요해?",
         "복수전공은 어떻게 신청해?",
@@ -311,6 +449,9 @@ with tab2:
     prompt = st.session_state.pop("pending_question", None) or typed_prompt
 
     if prompt:
+        current_chat = st.session_state.chats[st.session_state.current_chat]
+        if not current_chat["title"]:
+            current_chat["title"] = prompt.strip().replace("\n", " ")[:TITLE_MAX]
         st.session_state.messages.append({"role": "user", "content": prompt})
         
         with chat_container:
@@ -318,7 +459,11 @@ with tab2:
                 st.markdown(prompt)
             with st.chat_message("assistant"):
                 with st.spinner("2026 학사 규정을 분석하여 답변을 생성 중입니다..."):
-                    response = fetch_cached_answer(prompt.strip())
+                    try:
+                        response = fetch_cached_answer(prompt.strip())
+                    except Exception as e:
+                        response = "⚠️ 답변을 가져오지 못했습니다. 잠시 후 같은 질문을 다시 시도해 주세요."
+                        print(f"[답변 생성 오류] {e}")
                     st.markdown(response)
 
         st.session_state.messages.append({"role": "assistant", "content": response})
