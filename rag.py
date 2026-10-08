@@ -114,6 +114,40 @@ def detect_department_from_query(query: str) -> str:
                 return dept
     return None
 
+def strip_department_name(query: str) -> str:
+    """질문에서 학과명을 지운 문장을 반환합니다. 학과명이 없거나 지우면 너무 짧아지면 원문을 그대로 반환합니다.
+    (학과명이 많이 나오는 표·과정 문서가 규정 문서보다 먼저 검색되는 것을 줄이기 위해 사용)"""
+    dept = detect_department_from_query(query)
+    if not dept:
+        return query
+    names = {dept, normalize_dept_name(dept)}
+    stripped = query
+    for name in sorted(names, key=len, reverse=True):
+        # 글자 사이의 공백도 허용해서 지운다 (예: '컴퓨터 공학전공')
+        pattern = r"\s*".join(re.escape(ch) for ch in name if not ch.isspace())
+        # 학과명 바로 뒤에 붙은 조사(으로, 은, 는 등)도 함께 지운다
+        pattern += r"(?:으로|에서|에는|에|은|는|이|가|을|를|의|과|와|도)?(?=\s|$|[,.?!])"
+        stripped = re.sub(pattern, " ", stripped)
+    stripped = re.sub(r"\s+", " ", stripped).strip()
+    return stripped if len(stripped) >= 6 else query
+
+
+def search_rules(vectorstore, query: str, k_main: int = 4, k_extra: int = 2):
+    """규정 검색. 질문에 학과명이 있으면 (1) 학과명을 지운 질문으로 k_main개, (2) 원래 질문으로 k_extra개를
+    검색해 중복 없이 합칩니다. 학과명이 없으면 원래 질문으로 k_main개만 검색합니다."""
+    stripped = strip_department_name(query)
+    if stripped == query:
+        return vectorstore.similarity_search(query, k=k_main)
+
+    docs, seen = [], set()
+    for q, k in ((stripped, k_main), (query, k_extra)):
+        for doc in vectorstore.similarity_search(q, k=k):
+            if doc.page_content not in seen:
+                seen.add(doc.page_content)
+                docs.append(doc)
+    return docs
+
+
 def get_vectorstore_base():
     """캐시 없이 순수 벡터스토어 객체를 반환합니다."""
     resolved_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
@@ -281,10 +315,8 @@ class CurriculumAdvisor:
                 # 학과 필터 제거: 저장된 태그(target_department)가 학과명이 아니라
                 # '다전공', '복수전공' 같은 제도·목차 이름이라, 학과명이 든 질문에서
                 # 복수전공 규정 등이 검색에서 빠지던 문제가 있었음
-                search_kwargs = {"k": 4}
-
-                retriever = vectorstore.as_retriever(search_kwargs=search_kwargs)
-                retrieved_docs = retriever.invoke(user_question)
+                # 질문에 학과명이 있으면 학과명을 지운 질문(일반 규정)과 원래 질문(학과별 내용)을 함께 검색
+                retrieved_docs = search_rules(vectorstore, user_question)
                 t2 = time.perf_counter()
                 n_docs = len(retrieved_docs)
                 rules_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
