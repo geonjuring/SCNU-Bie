@@ -278,22 +278,10 @@ class CurriculumAdvisor:
         
         if vectorstore:
             try:
-                # 💡 질문에서 학과명 감지 후 메타데이터 $or 필터 동적 적용
-                detected_dept = detect_department_from_query(user_question)
+                # 학과 필터 제거: 저장된 태그(target_department)가 학과명이 아니라
+                # '다전공', '복수전공' 같은 제도·목차 이름이라, 학과명이 든 질문에서
+                # 복수전공 규정 등이 검색에서 빠지던 문제가 있었음
                 search_kwargs = {"k": 4}
-                
-                if detected_dept:
-                    # 필터에 사용할 학과명을 정규화 (괄호 제거)
-                    normalized_dept = normalize_dept_name(detected_dept)
-                    search_kwargs["filter"] = {
-                        "$or": [
-                            {"target_department": normalized_dept},
-                            {"target_department": "공통"}
-                        ]
-                    }
-                    print(f"🔍 [메타데이터 필터 적용] 대상 학과: {detected_dept} -> {normalized_dept}")
-                else:
-                    print("🔍 [전체/공통 검색] 특정 학과가 감지되지 않아 공통 규정 위주로 검색합니다.")
 
                 retriever = vectorstore.as_retriever(search_kwargs=search_kwargs)
                 retrieved_docs = retriever.invoke(user_question)
@@ -301,18 +289,20 @@ class CurriculumAdvisor:
                 n_docs = len(retrieved_docs)
                 rules_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
             except Exception as e:
-                rules_context = f"(규정 검색 중 오류: {e})"
+                # 오류를 문맥으로 넘기지 않고 예외를 올려서 @st.cache_data에 저장되지 않게 함
+                raise RuntimeError(f"규정 검색 실패: {e}") from e
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", """당신은 국립순천대학교 교육과정 학사 지도 전문 컨설턴트입니다.
-2026학년도 교육과정 편람 지침(교양/전공 이수원칙, 자유전공학부 2학년 진입규정, 다전공/부전공/융합전공 요건, 졸업 기준 등)을 바탕으로 학생의 질문에 명확하고 친절하게 답변하세요."""),
+2026학년도 교육과정 편람 지침(교양/전공 이수원칙, 다전공/부전공/융합전공 요건, 졸업 기준 등)을 바탕으로 학생의 질문에 명확하고 친절하게 답변하세요."""),
             ("user", f"""[질문 내용]:
 {user_question}
 
 [편람 규정 검색 결과]:
 {rules_context if rules_context else "검색된 관련 규정이 없습니다."}
 
-위 검색된 편람 규정을 바탕으로 학생의 질문에 대해서만 구체적이고 정확하게 답변해 주세요.""")
+위 검색된 편람 규정을 바탕으로 학생의 질문에 대해서만 구체적이고 정확하게 답변해 주세요.
+검색된 규정에 질문과 관련된 내용이 없으면 추측하거나 일반론으로 채우지 말고, "제공된 편람 검색 결과에서는 확인되지 않습니다"라고 답한 뒤 학과 사무실이나 교무학사과 문의를 안내하세요.""")
         ])
         chain = prompt | self.llm | StrOutputParser()
         answer = chain.invoke({})
