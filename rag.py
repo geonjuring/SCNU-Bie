@@ -1,18 +1,19 @@
 import os
 import json
 import re
+import time
 from dotenv import load_dotenv
-from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
+import streamlit as st
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
+# .env 환경변수 로드
 load_dotenv()
 
 DATA_DIR = "data"
 CHROMA_DIR = "./chroma_db"
-EMBEDDING_MODEL_NAME = "jhgan/ko-sroberta-multitask"
+EMBEDDING_MODEL_NAME = "gemini-embedding-2"
 RULES_PATH = os.path.join(DATA_DIR, "rules.json")
 CURRICULUM_PATH = os.path.join(DATA_DIR, "curriculum.json")
 
@@ -53,6 +54,7 @@ SCHOOL_DEPARTMENT_MAP = {
     ]
 }
 
+@st.cache_resource
 def load_json_file(file_path: str):
     if os.path.exists(file_path):
         with open(file_path, "r", encoding="utf-8") as f:
@@ -101,6 +103,68 @@ def format_separated_course_item(course: dict) -> str:
 
 def normalize_dept_name(name: str) -> str:
     return re.sub(r'\(.*?\)', '', name).strip().replace(" ", "")
+
+def detect_department_from_query(query: str) -> str:
+    """질문 내용에서 등록된 학과 이름이 포함되어 있는지 감지합니다.
+    반환값: 학과명 또는 None. 필터링에 사용하려면 normalize_dept_name() 적용 필요."""
+    for school, depts in SCHOOL_DEPARTMENT_MAP.items():
+        for dept in depts:
+            clean_dept = normalize_dept_name(dept)
+            if clean_dept in query.replace(" ", "") or dept in query:
+                return dept
+    return None
+
+def strip_department_name(query: str) -> str:
+    """질문에서 학과명을 지운 문장을 반환합니다. 학과명이 없거나 지우면 너무 짧아지면 원문을 그대로 반환합니다.
+    (학과명이 많이 나오는 표·과정 문서가 규정 문서보다 먼저 검색되는 것을 줄이기 위해 사용)"""
+    dept = detect_department_from_query(query)
+    if not dept:
+        return query
+    names = {dept, normalize_dept_name(dept)}
+    stripped = query
+    for name in sorted(names, key=len, reverse=True):
+        # 글자 사이의 공백도 허용해서 지운다 (예: '컴퓨터 공학전공')
+        pattern = r"\s*".join(re.escape(ch) for ch in name if not ch.isspace())
+        # 학과명 바로 뒤에 붙은 조사(으로, 은, 는 등)도 함께 지운다
+        pattern += r"(?:으로|에서|에는|에|은|는|이|가|을|를|의|과|와|도)?(?=\s|$|[,.?!])"
+        stripped = re.sub(pattern, " ", stripped)
+    stripped = re.sub(r"\s+", " ", stripped).strip()
+    return stripped if len(stripped) >= 6 else query
+
+
+def search_rules(vectorstore, query: str, k_main: int = 4, k_extra: int = 2):
+    """규정 검색. 질문에 학과명이 있으면 (1) 학과명을 지운 질문으로 k_main개, (2) 원래 질문으로 k_extra개를
+    검색해 중복 없이 합칩니다. 학과명이 없으면 원래 질문으로 k_main개만 검색합니다."""
+    stripped = strip_department_name(query)
+    if stripped == query:
+        return vectorstore.similarity_search(query, k=k_main)
+
+    docs, seen = [], set()
+    for q, k in ((stripped, k_main), (query, k_extra)):
+        for doc in vectorstore.similarity_search(q, k=k):
+            if doc.page_content not in seen:
+                seen.add(doc.page_content)
+                docs.append(doc)
+    return docs
+
+
+def get_vectorstore_base():
+    """캐시 없이 순수 벡터스토어 객체를 반환합니다."""
+    resolved_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if os.path.exists(CHROMA_DIR) and resolved_key:
+        try:
+            from langchain_community.vectorstores import Chroma
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model=EMBEDDING_MODEL_NAME,
+                google_api_key=resolved_key,
+            )
+            return Chroma(
+                persist_directory=CHROMA_DIR,
+                embedding_function=embeddings,
+            )
+        except Exception as e:
+            print(f"Vectorstore load error: {e}")
+    return None
 
 def get_department_curriculum(department: str):
     curriculum_list = load_json_file(CURRICULUM_PATH)
@@ -176,7 +240,7 @@ def get_department_curriculum(department: str):
     return required_summary, grade_data_dict, separated_results
 
 class CurriculumAdvisor:
-    def __init__(self, api_key: str = None, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str = None, model_name: str = "gemini-3.5-flash-lite"):
         self.rules = load_json_file(RULES_PATH)
         resolved_key = api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 
@@ -188,24 +252,7 @@ class CurriculumAdvisor:
             max_output_tokens=4096,
         ) if resolved_key else None
 
-        # 💡 embding_2.py로 구축한 Chroma DB 연동
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
-        if os.path.exists(CHROMA_DIR):
-            self.vectorstore = Chroma(
-                persist_directory=CHROMA_DIR,
-                embedding_function=self.embeddings,
-            )
-            self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 4})
-        else:
-            self.vectorstore = None
-            self.retriever = None
-
     def get_curriculum_info(self, school: str, department: str) -> dict:
-        """학과 규정 및 편성표 정보를 딕셔너리로 반환"""
         school_info = self.rules.get(school, {}) if isinstance(self.rules, dict) else {}
         dept_info = school_info.get(department, {})
         if not dept_info:
@@ -251,33 +298,53 @@ class CurriculumAdvisor:
             "grade_data": grade_data_dict,
             "separated_data": separated_data
         }
-    
-    # (get_curriculum_info 메서드는 기존 그대로 유지)
 
     def ask_consultant(self, user_question: str) -> str:
-        """사이드바 학과와 무관하게 질문 내용만을 기반으로 Chroma DB 검색 및 답변"""
         if not self.llm:
             return "⚠️ Gemini API Key가 설정되지 않았습니다."
 
-        # 💡 오로지 사용자의 질문 내용으로만 Chroma DB 검색
+        t0 = time.perf_counter()
+        vectorstore = get_vectorstore_base()
+        t1 = time.perf_counter()
+        t2 = t1
+        n_docs = 0
         rules_context = ""
-        if self.retriever:
+        
+        if vectorstore:
             try:
-                retrieved_docs = self.retriever.invoke(user_question)
+                # 학과 필터 제거: 저장된 태그(target_department)가 학과명이 아니라
+                # '다전공', '복수전공' 같은 제도·목차 이름이라, 학과명이 든 질문에서
+                # 복수전공 규정 등이 검색에서 빠지던 문제가 있었음
+                # 질문에 학과명이 있으면 학과명을 지운 질문(일반 규정)과 원래 질문(학과별 내용)을 함께 검색
+                retrieved_docs = search_rules(vectorstore, user_question)
+                t2 = time.perf_counter()
+                n_docs = len(retrieved_docs)
                 rules_context = "\n\n".join([doc.page_content for doc in retrieved_docs])
             except Exception as e:
-                rules_context = f"(규정 검색 중 오류: {e})"
+                # 오류를 문맥으로 넘기지 않고 예외를 올려서 @st.cache_data에 저장되지 않게 함
+                raise RuntimeError(f"규정 검색 실패: {e}") from e
 
         prompt = ChatPromptTemplate.from_messages([
             ("system", """당신은 국립순천대학교 교육과정 학사 지도 전문 컨설턴트입니다.
-2026학년도 교육과정 편람 지침(교양/전공 이수원칙, 자유전공학부 2학년 진입규정, 다전공/부전공/융합전공 요건, 졸업 기준 등)을 바탕으로 학생의 질문에 명확하고 친절하게 답변하세요."""),
+2026학년도 교육과정 편람 지침(교양/전공 이수원칙, 다전공/부전공/융합전공 요건, 졸업 기준 등)을 바탕으로 학생의 질문에 명확하고 친절하게 답변하세요."""),
             ("user", f"""[질문 내용]:
 {user_question}
 
 [편람 규정 검색 결과]:
 {rules_context if rules_context else "검색된 관련 규정이 없습니다."}
 
-위 검색된 편람 규정을 바탕으로 학생의 질문에 대해서만 구체적이고 정확하게 답변해 주세요.""")
+위 검색된 편람 규정을 바탕으로 학생의 질문에 대해서만 구체적이고 정확하게 답변해 주세요.
+검색된 규정에 질문과 관련된 내용이 없으면 추측하거나 일반론으로 채우지 말고, "제공된 편람 검색 결과에서는 확인되지 않습니다"라고 답한 뒤 학과 사무실이나 교무학사과 문의를 안내하세요.""")
         ])
         chain = prompt | self.llm | StrOutputParser()
-        return chain.invoke({})
+        answer = chain.invoke({})
+        t3 = time.perf_counter()
+        # 진단용: 어느 단계가 느린지 로그로 확인 (Streamlit Cloud > Manage app > Logs)
+        # flush=True: 로그에 바로 나타나도록 (없으면 출력이 늦게 보일 수 있음)
+        print(
+            f"[타이밍] 질문='{user_question[:20]}' | 벡터스토어 준비 {t1-t0:.2f}s | "
+            f"검색(질문 임베딩 포함) {t2-t1:.2f}s (문서 {n_docs}개, 근거 {len(rules_context)}자) | "
+            f"LLM 답변 {t3-t2:.2f}s (답변 {len(answer)}자) | 전체 {t3-t0:.2f}s",
+            flush=True,
+        )
+        return answer
